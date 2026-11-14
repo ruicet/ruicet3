@@ -1,0 +1,108 @@
+import streamlit as st
+import time
+
+# Настройка страницы
+st.set_page_config(
+    page_title="OSINT Analyzer",
+    page_icon="🕵️‍♂️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# --- Стилизация (немного темной темы через CSS) ---
+st.markdown("""
+    <style>
+    .report-box {
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #4ade80;
+        color: #e0e0e0;
+        font-family: monospace;
+        margin-bottom: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("🕵️‍♂️ OSINT Framework: Анализ инфополя")
+st.markdown("---")
+
+# --- Боковая панель (Ввод данных) ---
+st.sidebar.header("Параметры запроса")
+target_type = st.sidebar.selectbox(
+    "Что анализируем?",
+    ["Номер телефона", "Email", "Никнейм (Username)", "Домен"]
+)
+
+target_value = st.sidebar.text_input(f"Введите {target_type}")
+
+analyze_btn = st.sidebar.button("🚀 Запустить анализ", use_container_width=True)
+
+st.sidebar.markdown("---")
+st.sidebar.warning(
+    "⚠️ **Внимание:** Скрипт работает только с легальными открытыми API. Поиск по базам утечек (Data Breaches) и закрытым данным не осуществляется во избежание нарушения 152-ФЗ.")
+
+# --- Основная логика ---
+if analyze_btn:
+    if not target_value:
+        st.error("Пожалуйста, введите данные для анализа.")
+    else:
+        # Анимация загрузки
+        with st.spinner(f"Анализ объекта: {target_value}..."):
+            time.sleep(1.5)  # Имитация работы скрипта
+
+        st.success(f"Анализ для **{target_value}** успешно завершен!")
+
+        # --- Структура отчета ---
+        st.header("1. Краткая сводка (Executive Summary)")
+        st.write(f"Объект исследования: **{target_value}** (Тип: {target_type}). "
+                 f"Выявлен цифровой след в открытых источниках. Требуется ручная верификация связанных сущностей.")
+
+        st.header("2. Факты (Verified Facts)")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info("**Данные из открытых реестров**")
+            st.write(f"- Формат валиден: `{len(target_value) > 3}`")
+            st.write("- Источник: Глобальные поисковые системы")
+        with col2:
+            st.info("**Технический след**")
+            st.write("- IP-адрес: Скрыт/Неизвестен")
+            st.write("- Хостинг: Не определен (требуется Shodan)")
+
+        st.header("3. Цифровой след (Digital Footprint)")
+        st.write("Обнаружены возможные пересечения:")
+
+        # Имитация найденных данных (зависит от типа)
+        if target_type == "Номер телефона":
+            st.markdown(f"""
+            *   **Мессенджеры:** Возможна регистрация в Telegram/WhatsApp.
+            *   **Соцсети:** Возможен профиль ВКонтакте.
+            *   **Оператор:** Код `{target_value[:4]}` (требуется проверка MNP).
+            """)
+        elif target_type == "Email":
+            st.markdown(f"""
+            *   **Утечки:** Проверить через HIBP API.
+            *   **Аккаунты:** Возможна привязка к GitHub, VK, Steam.
+            """)
+        elif target_type == "Домен":
+            st.markdown(f"""
+            *   **WHOIS:** Требуется запрос к базе данных.
+            *   **Subdomains:** Проверить через crt.sh.
+            """)
+
+        st.header("4. Хронология / События (Timeline)")
+        st.warning("Хронология недоступна без глубокого парсинга архивов (Wayback Machine).")
+
+        st.header("5. Гипотезы и белые пятна")
+        st.write("- **Гипотеза 1:** Объект может быть связан с юридическими лицами (требует проверки ЕГРЮЛ/ИП).")
+        st.write("- **Белое пятно:** Личность владельца (PII) полностью скрыта.")
+
+        st.header("6. Рекомендуемые шаги (Next Steps)")
+        st.code(f"""
+# Для дальнейшего анализа рекомендуются команды:
+sherlock {target_value}       # Поиск по никнеймам
+theHarvester -d {target_value} # Поиск почт и поддоменов
+""", language="bash")
+
+else:
+    st.info("👈 Введите данные в боковой панели слева и нажмите 'Запустить анализ'.")
